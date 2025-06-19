@@ -33,7 +33,6 @@ jobs:
         with:
           flutter-version: "3.29.0"
       - name: Test Android integration
-        working-directory: example
         run: flutter build apk
 
   test-ios-integration:
@@ -48,14 +47,11 @@ jobs:
         with:
           flutter-version: "3.16.0"
       - name: Clean
-        working-directory: example
         run: flutter clean
       - name: Flutter pub get
-        working-directory: example
         run: flutter pub get
       - name: CocoaPods update
-        working-directory: example/ios
+        working-directory: ios
         run: pod repo update
       - name: Test iOS integration
-        working-directory: example
         run: flutter build ios --debug --simulator --no-codesign
