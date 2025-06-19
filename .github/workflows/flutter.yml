@@ -16,7 +16,7 @@ jobs:
           java-version: "12.x"
       - uses: subosito/flutter-action@v1
         with:
-          flutter-version: "3.29.3"
+          flutter-version: "3.29.2"
       - run: flutter pub get
       - run: flutter test
       - run: flutter analyze --no-pub --no-current-package lib
@@ -31,7 +31,7 @@ jobs:
           distribution: 'temurin'
       - uses: subosito/flutter-action@v1
         with:
-          flutter-version: "3.29.0"
+          flutter-version: "3.29.2"
       - name: Test Android integration
         run: flutter build apk
 
