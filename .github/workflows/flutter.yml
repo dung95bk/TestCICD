@@ -17,6 +17,7 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           flutter-version: "3.29.2"
+          architecture: arm64
       - run: flutter pub get
       - run: flutter test
       - run: flutter analyze --no-pub --no-current-package lib
@@ -32,6 +33,7 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           flutter-version: "3.29.2"
+	  architecture: arm64
       - name: Test Android integration
         run: flutter build apk
 
