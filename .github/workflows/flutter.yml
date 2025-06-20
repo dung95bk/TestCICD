@@ -40,6 +40,19 @@ jobs:
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+      - name: ✅ Notify success (Android)
+        if: success()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="✅ Android APK built successfully for *${{ github.repository }}* on branch `${{ github.ref_name }}`"
+      - name: ❌ Notify failure (Android)
+        if: failure()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="❌ Android build failed for *${{ github.repository }}* on branch `${{ github.ref_name }}`"
+
   deploy-to-firebase:
     needs: test-android-integration
     runs-on: ubuntu-latest
@@ -55,7 +68,21 @@ jobs:
           appId: ${{ secrets.FIREBASE_APP_ID }}
           token: ${{ secrets.FIREBASE_AUTH_TOKEN }}
           groups: testers
-          file: app/app-release.apk  
+          file: app/app-release.apk
+
+      - name: ✅ Notify success (Firebase upload)
+        if: success()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="✅ APK deployed to Firebase App Distribution for *${{ github.repository }}* on branch `${{ github.ref_name }}`"
+      - name: ❌ Notify failure (Firebase upload)
+        if: failure()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="❌ Firebase upload failed for *${{ github.repository }}* on branch `${{ github.ref_name }}`"
+
   test-ios-integration:
     runs-on: macos-latest
     steps:
@@ -77,3 +104,15 @@ jobs:
         run: pod repo update
       - name: Test iOS integration
         run: flutter build ios --debug --simulator --no-codesign
+      - name: ✅ Notify success (iOS)
+        if: success()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="✅ iOS build (simulator) completed successfully for *${{ github.repository }}* on branch `${{ github.ref_name }}`"
+      - name: ❌ Notify failure (iOS)
+        if: failure()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="❌ iOS build (simulator) failed for *${{ github.repository }}* on branch `${{ github.ref_name }}`"
