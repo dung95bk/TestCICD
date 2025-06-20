@@ -82,7 +82,35 @@ jobs:
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
             -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
             -d text="❌ Firebase upload failed for *${{ github.repository }}* on branch `${{ github.ref_name }}`"
+  deploy-to-deploygate:
+    needs: test-android-integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-apk
+          path: app
 
+      - name: Upload APK to DeployGate
+        run: |
+          curl -X POST https://deploygate.com/api/users/${{ secrets.DEPLOYGATE_USER_NAME }}/apps \
+            -H "Authorization: token ${{ secrets.DEPLOYGATE_API_KEY }}" \
+            -F "file=@app/app-release.apk" \
+            -F "message=🚀 Uploaded from GitHub Actions CI (${GITHUB_REPOSITORY})"
+
+      - name: ✅ Notify success (DeployGate upload)
+        if: success()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="✅ APK uploaded to *DeployGate* for *${{ github.repository }}* on branch `${{ github.ref_name }}`"
+
+      - name: ❌ Notify failure (DeployGate upload)
+        if: failure()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="❌ DeployGate upload failed for *${{ github.repository }}* on branch `${{ github.ref_name }}`"
   test-ios-integration:
     runs-on: macos-latest
     steps:
@@ -94,7 +122,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.29.2"
-          architecture: arm64 
+          architecture: arm64
       - name: Clean
         run: flutter clean
       - name: Flutter pub get
